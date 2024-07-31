@@ -43,11 +43,11 @@ const createExercise = async (req, res) => {
 
       const exercise = await exerciceObj.save();
       res.json({
-        _id: user._id,
         username: user.username,
+        _id: user._id,
         description: exercise.description,
         duration: exercise.duration,
-        date: new Date(exercise.date).toDateString,
+        date: new Date(exercise.date).toDateString(),
       });
     }
   } catch (error) {
