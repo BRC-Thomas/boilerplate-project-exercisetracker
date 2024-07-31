@@ -56,8 +56,56 @@ const createExercise = async (req, res) => {
   }
 };
 
+const getUserLogs = async (req, res) => {
+  const { from, to, limit } = req.query;
+  const userID = req.params._id;
+  const user = await User.findById(userID);
+
+  if (!user) {
+    res.send("Could not find user");
+    return;
+  }
+
+  let filter = {
+    user_id: userID,
+  };
+  let dateObj = {};
+
+  if (from) {
+    dateObj["$gte"] = new Date(from);
+  }
+  if (to) {
+    dateObj["$lte"] = new Date(to);
+  }
+  if (from || to) {
+    filter.date = dateObj;
+  }
+
+  try {
+    const exercises = await Exercise.find(
+      filter
+    ).limit(+limit ?? 500);
+
+    const log = exercises.map(e => ({
+      description : e.description,
+      duration : e.duration,
+      date : e.date.toDateString(),
+    }))
+
+    const logsCount = await Exercise.countDocuments({ user_id: userID });
+
+    res.json({
+      username: user.username,
+      count: logsCount,
+      _id: user._id,
+      log: log,
+    });
+  } catch (error) {}
+};
+
 module.exports = {
   getAllUsers,
   createUser,
   createExercise,
+  getUserLogs,
 };
